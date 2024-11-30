@@ -14,7 +14,7 @@ namespace DAL.Repositories
 
         public FileStoreRepository(string filePath)
         {
-            _filePath = filePath;
+            _filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", filePath);
         }
         public void AddStore(Store store)
         {

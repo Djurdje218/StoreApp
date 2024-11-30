@@ -15,7 +15,7 @@ namespace DAL.Repositories
 
         public FileProductRepository(string filePath)
         {
-            _filePath = filePath;
+            _filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", filePath);
         }
         public void AddProduct(Product product)
         {
