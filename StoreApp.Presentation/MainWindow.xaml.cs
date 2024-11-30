@@ -108,14 +108,21 @@ namespace StoreApp
         private void AddProductButton_Click(object sender, RoutedEventArgs e)
         {
             var productName = ProductNameTextBox.Text.Trim();
-            var storeCode = ProductStoreCodeTextBox.Text.Trim();
+            var storeCodeText = ProductStoreCodeTextBox.Text.Trim();
             var quantityText = ProductQuantityTextBox.Text.Trim();
             var priceText = ProductPriceTextBox.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(productName) || string.IsNullOrWhiteSpace(storeCode) ||
-                string.IsNullOrWhiteSpace(quantityText) || string.IsNullOrWhiteSpace(priceText))
+            if ( string.IsNullOrWhiteSpace(productName) || string.IsNullOrWhiteSpace(storeCodeText) ||
+                string.IsNullOrWhiteSpace(quantityText) || string.IsNullOrWhiteSpace(priceText) ||
+                ProductNameTextBox.Text == ProductNameTextBox.Tag.ToString() )
             {
                 MessageBox.Show("All fields are required.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!int.TryParse(storeCodeText, out var storeCode) || storeCode < 0)
+            {
+                MessageBox.Show("Store Code must be a valid non-negative number.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -134,7 +141,7 @@ namespace StoreApp
             var productDto = new ProductDto
             {
                 Name = productName,
-                StoreCode = int.Parse(storeCode),
+                StoreCode = storeCode,
                 Quantity = quantity,
                 Price = price
             };
@@ -150,14 +157,18 @@ namespace StoreApp
         {
             var productName = QueryProductNameTextBox.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(productName))
+            if (string.IsNullOrWhiteSpace(productName) || QueryProductNameTextBox.Text == QueryProductNameTextBox.Tag.ToString())
             {
                 MessageBox.Show("Product Name is required.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
+         
+
             var cheapestProduct = _productService.FindCheapestStoreForProduct(productName);
-            var cheapestStore = _storeService.GetStoreByCode(cheapestProduct.StoreCode);
+
+
+  
 
             if (cheapestProduct == null)
             {
@@ -165,6 +176,7 @@ namespace StoreApp
             }
             else
             {
+                var cheapestStore = _storeService.GetStoreByCode(cheapestProduct.StoreCode);
                 QueryResultsListBox.Items.Clear();
                 QueryResultsListBox.Items.Add($"Cheapest store for '{productName}': {cheapestStore.Code} - {cheapestStore.Name} -> price {cheapestProduct.Price}");
             }
@@ -176,7 +188,8 @@ namespace StoreApp
             var storeCode = QueryStoreCodeTextBox.Text.Trim();
             var budgetText = BudgetTextBox.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(storeCode) || string.IsNullOrWhiteSpace(budgetText))
+            if (string.IsNullOrWhiteSpace(storeCode) || string.IsNullOrWhiteSpace(budgetText) || 
+                QueryStoreCodeTextBox.Text == QueryStoreCodeTextBox.Tag.ToString() || BudgetTextBox.Text == BudgetTextBox.Tag.ToString() )
             {
                 MessageBox.Show("Store Code and Budget are required.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -209,14 +222,21 @@ namespace StoreApp
         {
 
             var productName = ProductNameTextBox.Text.Trim();
-            var storeCode = ProductStoreCodeTextBox.Text.Trim();
+            var storeCodeText = ProductStoreCodeTextBox.Text.Trim();
             var quantityText = ProductQuantityTextBox.Text.Trim();
             var priceText = ProductPriceTextBox.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(productName) || string.IsNullOrWhiteSpace(storeCode) ||
-                string.IsNullOrWhiteSpace(quantityText) || string.IsNullOrWhiteSpace(priceText))
+            if (string.IsNullOrWhiteSpace(productName) || string.IsNullOrWhiteSpace(storeCodeText) ||
+                string.IsNullOrWhiteSpace(quantityText) || string.IsNullOrWhiteSpace(priceText) ||
+                ProductNameTextBox.Text == ProductNameTextBox.Tag.ToString())
             {
                 MessageBox.Show("All fields are required.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!int.TryParse(storeCodeText, out var storeCode) || storeCode < 0)
+            {
+                MessageBox.Show("Store Code must be a valid non-negative number.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -235,11 +255,11 @@ namespace StoreApp
             try
             {
                 var productUpdates = new Dictionary<string, (int quantity, decimal price)>
-        {
-            { productName, (quantity, price) }
-        };
+                {
+                { productName, (quantity, price) }
+                };
 
-                _productService.RestockProducts(int.Parse(storeCode), productUpdates);
+                _productService.RestockProducts(storeCode, productUpdates);
 
                 MessageBox.Show("Products restocked successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
