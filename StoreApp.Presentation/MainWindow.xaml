@@ -1,0 +1,79 @@
+﻿<Window x:Class="StoreApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:StoreApp"
+        mc:Ignorable="d"
+        Title="StoreApp" Height="500" Width="800">
+    
+    <Grid >
+
+        <TabControl Background="AliceBlue">
+            
+            <!-- Store Management Tab -->
+            <TabItem Header="Store Management">
+                
+                <StackPanel Background="AliceBlue" Margin="10">
+                   
+
+                    <TextBlock Text="Store Management" FontSize="18" FontFamily="Agency" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBox x:Name="StoreCodeTextBox" Width="100" Margin="0,0,10,0" Tag="Enter Store Code" Text="Enter Store Code" Foreground="Gray" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" />
+                        <TextBox x:Name="StoreNameTextBox" Width="200" Margin="0,0,10,0" Tag="Enter Store Name" Text="Enter Store Name" Foreground="Gray" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                        <TextBox x:Name="StoreAddressTextBox" Width="200" Margin="0,0,10,0" Tag="Enter Store Address" Text="Enter Store Address" Foreground="Gray" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" />
+                        <Button Content="Add Store" Width="100" Click="AddStoreButton_Click"/>
+                    </StackPanel>
+                    <ListBox   Background="SkyBlue" FontStyle="Normal" FontFamily="Agency" Height="300" FontSize="16" x:Name="StoresListBox"   BorderBrush="Gray" BorderThickness="1"/>
+
+                </StackPanel>
+            </TabItem>
+
+            <!-- Product Management Tab -->
+            <TabItem Header="Product Management">
+                <StackPanel Margin="10">
+                    <TextBlock Text="Product Management" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBox x:Name="ProductNameTextBox" Width="150" Margin="0,0,10,0" Tag="Product Name" Text="Product Name" Foreground="Gray" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                        <TextBox x:Name="ProductStoreCodeTextBox" Width="100" Margin="0,0,10,0" Tag="Store Code" Text="Store Code" Foreground="Gray" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                        <TextBox x:Name="ProductPriceTextBox" Width="100" Margin="0,0,10,0" Tag="Price"  Text="Price" Foreground="Gray" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                        <TextBox x:Name="ProductQuantityTextBox" Width="100" Margin="0,0,10,0" Tag="Quantity" Text="Quantity" Foreground="Gray" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                        <Button Content="Add Product" Width="100" Click="AddProductButton_Click"/>
+                        <Button Content="Restock Products" Width="100" Height="23" Click="RestockProductsButton_Click" Margin="40,0,0,0"/>
+                    </StackPanel>
+
+                    <ListBox   Background="SkyBlue" FontStyle="Normal" FontFamily="Agency" Height="300" FontSize="16" x:Name="ProductsListBox"   BorderBrush="Gray" BorderThickness="1"/>
+
+                </StackPanel>
+            </TabItem>
+
+            <!-- Product Queries Tab -->
+            <TabItem Header="Product Queries">
+                <StackPanel Margin="10">
+                    <TextBlock Text="Product Queries" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBox x:Name="QueryProductNameTextBox" Width="150" Margin="0,0,10,0" Tag="Product Name" Text="Product Name" Foreground="Gray" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                        <Button Content="Find Cheapest Store" Width="150" Click="FindCheapestStoreButton_Click"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBox x:Name="QueryStoreCodeTextBox" Width="150" Margin="0,0,10,0" Tag="Store Code" Text="Store Code" Foreground="Gray" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                        <TextBox x:Name="BudgetTextBox" Width="150" Margin="0,0,10,0" Tag="Budget"  Text="Budget" Foreground="Gray" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                        <Button  Content="Find Purchasable Products" Width="150" Click="FindPurchasableProductsButton_Click"/>
+                    </StackPanel>
+
+                    <ListBox x:Name="QueryResultsListBox" FontStyle="Normal" FontFamily="Agency" Height="300" FontSize="16" BorderBrush="Gray" BorderThickness="1">
+                        <ListBox.Background>
+                            
+                            <ImageBrush  ImageSource="\images\graphic.jpg"  Stretch="None" Viewport="0.6,0.5,0.5,0.55"/>
+                        </ListBox.Background>
+                    </ListBox>
+                    <Image Height="100" Width="100"/>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
