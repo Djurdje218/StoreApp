@@ -36,6 +36,7 @@
                     <TextBlock Text="Product Management" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBox x:Name="ProductIdTextBox" Width="80" Margin="0,0,10,0" Tag="Product Id" Text="Product Id" Foreground="Gray" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
                         <TextBox x:Name="ProductNameTextBox" Width="150" Margin="0,0,10,0" Tag="Product Name" Text="Product Name" Foreground="Gray" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
                         <TextBox x:Name="ProductStoreCodeTextBox" Width="100" Margin="0,0,10,0" Tag="Store Code" Text="Store Code" Foreground="Gray" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
                         <TextBox x:Name="ProductPriceTextBox" Width="100" Margin="0,0,10,0" Tag="Price"  Text="Price" Foreground="Gray" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>

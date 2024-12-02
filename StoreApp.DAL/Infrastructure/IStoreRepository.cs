@@ -4,8 +4,8 @@ namespace DAL.Infrastructure
 {
     public interface IStoreRepository
     {
-        void AddStore(Store store);
-        Store GetStoreByCode(int code);
-        IEnumerable<Store> GetAllStores();
+        Task AddStoreAsync(Store store);
+        Task<Store> GetStoreByCodeAsync(int code);
+        Task<IEnumerable<Store>> GetAllStoresAsync();
     }
 }

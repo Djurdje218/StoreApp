@@ -11,8 +11,8 @@ namespace BLL.Services
 {
     public interface IStoreService
     {
-        void AddStore(StoreDto storeDto);
-        IEnumerable<StoreDto> GetAllStores();
-        StoreDto GetStoreByCode(int storeCode);
+        Task AddStoreAsync(StoreDto storeDto);
+        Task<IEnumerable<StoreDto>> GetAllStoresAsync();
+        Task<StoreDto> GetStoreByCodeAsync(int storeCode);
     }
 }

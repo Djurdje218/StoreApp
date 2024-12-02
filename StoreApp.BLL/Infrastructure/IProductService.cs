@@ -9,14 +9,14 @@ namespace BLL.Services
 {
     public interface IProductService
     {
-        void AddProduct(ProductDto productDto);
-        IEnumerable<ProductDto> GetAllProducts();
-        IEnumerable<ProductDto> GetProductsByStore(int storeCode);
-        ProductDto FindCheapestStoreForProduct(string productName);
-        decimal PurchaseProducts(int storeCode, Dictionary<string, int> products);
-        (int storeCode, decimal totalCost) FindCheapestStoreForBatch(Dictionary<string, int> productBatch);
-        void RestockProducts(int storeCode, Dictionary<string, (int quantity, decimal price)> productUpdates);
-        IEnumerable<ProductDto> FindPurchasableProducts(int storeCode, decimal budget);
+        Task AddProductAsync(ProductDto productDto);
+        Task<IEnumerable<ProductDto>> GetAllProductsAsync();
+        Task<IEnumerable<ProductDto>> GetProductsByStore(int storeCode);
+        Task<ProductDto> FindCheapestStoreForProductAsync(string productName);
+        Task<decimal> PurchaseProductsAsync(int storeCode, Dictionary<string, int> products);
+        Task<(int storeCode, decimal totalCost)> FindCheapestStoreForBatchAsync(Dictionary<string, int> productBatch);
+        Task RestockProductsAsync(int storeCode, Dictionary<string, (int quantity, decimal price)> productUpdates);
+        Task<IEnumerable<ProductDto>> FindPurchasableProductsAsync(int storeCode, decimal budget);
 
     }
 }

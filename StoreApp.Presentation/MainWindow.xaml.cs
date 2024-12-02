@@ -37,10 +37,10 @@ namespace StoreApp
 
 
         // Helper to load all stores into the ListBox
-        private void LoadStores()
+        private async void LoadStores()
         {
             StoresListBox.Items.Clear();
-            var stores = _storeService.GetAllStores();
+            var stores = await _storeService.GetAllStoresAsync();
             foreach (var store in stores)
             {
                 StoresListBox.Items.Add($"{store.Code}: {store.Name}  -  {store.Address}");
@@ -48,13 +48,13 @@ namespace StoreApp
         }
 
         // Helper to load all products into the ListBox
-        private void LoadProducts()
+        private async void LoadProducts()
         {
             ProductsListBox.Items.Clear();
-            var products = _productService.GetAllProducts();
+            var products = await _productService.GetAllProductsAsync();
             foreach (var product in products)
             {
-                ProductsListBox.Items.Add($"{product.Name} (Store: {product.StoreCode}, Price: {product.Price}, Qty: {product.Quantity})");
+                ProductsListBox.Items.Add($"id({product.id}) - {product.Name} (Store: {product.StoreCode}, Price: {product.Price}, Qty: {product.Quantity})");
             }
         }
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -70,13 +70,13 @@ namespace StoreApp
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             var textBox = sender as TextBox;
-            if (textBox != null && string.IsNullOrEmpty(textBox.Text)) // If no text is entered
+            if (textBox != null && string.IsNullOrEmpty(textBox.Text)) // if no text is entered
             {
-                textBox.Text = (string)textBox.Tag; // Restore the placeholder text
-                textBox.Foreground = new SolidColorBrush(Colors.Gray); // Set text color to gray for placeholder
+                textBox.Text = (string)textBox.Tag; // Restore placeholder text
+                textBox.Foreground = new SolidColorBrush(Colors.Gray); // Set text color to gray 
             }
         }
-        private void AddStoreButton_Click(object sender, RoutedEventArgs e)
+        private async void AddStoreButton_Click(object sender, RoutedEventArgs e)
         {
             var storeName = StoreNameTextBox.Text.Trim();
             var storeCode = StoreCodeTextBox.Text.Trim();
@@ -91,11 +91,11 @@ namespace StoreApp
             try
             {
                 var storeDto = new StoreDto { Name = storeName, Code = int.Parse(storeCode), Address = storeAddress };
-                _storeService.AddStore(storeDto);
+                await _storeService.AddStoreAsync(storeDto);
                 MessageBox.Show($"Store '{storeName}' added successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 LoadStores();
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -105,8 +105,9 @@ namespace StoreApp
         }
 
         // Event handler for adding a new product
-        private void AddProductButton_Click(object sender, RoutedEventArgs e)
+        private async void AddProductButton_Click(object sender, RoutedEventArgs e)
         {
+            var productId = ProductIdTextBox.Text.Trim();
             var productName = ProductNameTextBox.Text.Trim();
             var storeCodeText = ProductStoreCodeTextBox.Text.Trim();
             var quantityText = ProductQuantityTextBox.Text.Trim();
@@ -114,7 +115,7 @@ namespace StoreApp
 
             if ( string.IsNullOrWhiteSpace(productName) || string.IsNullOrWhiteSpace(storeCodeText) ||
                 string.IsNullOrWhiteSpace(quantityText) || string.IsNullOrWhiteSpace(priceText) ||
-                ProductNameTextBox.Text == ProductNameTextBox.Tag.ToString() )
+                ProductNameTextBox.Text == ProductNameTextBox.Tag.ToString() || string.IsNullOrWhiteSpace(productId) )
             {
                 MessageBox.Show("All fields are required.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -138,22 +139,37 @@ namespace StoreApp
                 return;
             }
 
-            var productDto = new ProductDto
+            if (!int.TryParse(productId, out var ID) || ID < 0)
             {
-                Name = productName,
-                StoreCode = storeCode,
-                Quantity = quantity,
-                Price = price
-            };
+                MessageBox.Show("Product ID must be a valid non-negative number.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
-            _productService.AddProduct(productDto);
 
-            MessageBox.Show($"Product '{productName}' added successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            LoadProducts();
+            try
+            {
+                var productDto = new ProductDto
+                {
+                    id = ID,
+                    Name = productName,
+                    StoreCode = storeCode,
+                    Quantity = quantity,
+                    Price = price
+                };
+
+                await _productService.AddProductAsync(productDto);
+
+                MessageBox.Show($"Product '{productName}' added successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                LoadProducts();
+            }
+            catch (Exception ex) 
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
-        // Event handler for finding the cheapest store for a product
-        private void FindCheapestStoreButton_Click(object sender, RoutedEventArgs e)
+        // Event handler for finding cheapest store for product
+        private async void FindCheapestStoreButton_Click(object sender, RoutedEventArgs e)
         {
             var productName = QueryProductNameTextBox.Text.Trim();
 
@@ -165,7 +181,7 @@ namespace StoreApp
 
          
 
-            var cheapestProduct = _productService.FindCheapestStoreForProduct(productName);
+            var cheapestProduct = await _productService.FindCheapestStoreForProductAsync(productName);
 
 
   
@@ -176,14 +192,14 @@ namespace StoreApp
             }
             else
             {
-                var cheapestStore = _storeService.GetStoreByCode(cheapestProduct.StoreCode);
+                var cheapestStore = await _storeService.GetStoreByCodeAsync(cheapestProduct.StoreCode);
                 QueryResultsListBox.Items.Clear();
                 QueryResultsListBox.Items.Add($"Cheapest store for '{productName}': {cheapestStore.Code} - {cheapestStore.Name} -> price {cheapestProduct.Price}");
             }
         }
 
-        // Event handler for finding products purchasable within a budget
-        private void FindPurchasableProductsButton_Click(object sender, RoutedEventArgs e)
+        // Event handler for finding products purchasable within budget
+        private async void FindPurchasableProductsButton_Click(object sender, RoutedEventArgs e)
         {
             var storeCode = QueryStoreCodeTextBox.Text.Trim();
             var budgetText = BudgetTextBox.Text.Trim();
@@ -201,7 +217,7 @@ namespace StoreApp
                 return;
             }
 
-            var products = _productService.FindPurchasableProducts(int.Parse(storeCode), budget);
+            var products = await _productService.FindPurchasableProductsAsync(int.Parse(storeCode), budget);
 
             QueryResultsListBox.Items.Clear();
 
@@ -218,7 +234,7 @@ namespace StoreApp
             }
         }
 
-        private void RestockProductsButton_Click(object sender, RoutedEventArgs e)
+        private async void RestockProductsButton_Click(object sender, RoutedEventArgs e)
         {
 
             var productName = ProductNameTextBox.Text.Trim();
@@ -259,7 +275,7 @@ namespace StoreApp
                 { productName, (quantity, price) }
                 };
 
-                _productService.RestockProducts(storeCode, productUpdates);
+                await _productService.RestockProductsAsync(storeCode, productUpdates);
 
                 MessageBox.Show("Products restocked successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }

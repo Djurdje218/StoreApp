@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Formats.Asn1.AsnWriter;
+
+
 
 namespace BLL.Services
 {
@@ -23,21 +26,21 @@ namespace BLL.Services
             _storeRepository = storeRepository;
             _mapper = mapper;
         }
-        public void AddProduct(ProductDto productDto)
+        public async Task AddProductAsync(ProductDto productDto)
         {
             var product = _mapper.Map<Product>(productDto);
-            _productRepository.AddProduct(product);
+            await _productRepository.AddProductAsync(product);
         }
 
-        public (int storeCode, decimal totalCost) FindCheapestStoreForBatch(Dictionary<string, int> productBatch)
+        public async Task <(int storeCode, decimal totalCost)> FindCheapestStoreForBatchAsync(Dictionary<string, int> productBatch)
         {
-            var stores = _storeRepository.GetAllStores();
+            var stores = await _storeRepository.GetAllStoresAsync();
             decimal minCost = decimal.MaxValue;
             int bestStore = -1;
 
             foreach (var store in stores)
             {
-                var storeProducts = _productRepository.GetProductsByStore(store.Code);
+                var storeProducts = await _productRepository.GetProductsByStoreAsync(store.Code);
                 decimal totalCost = 0;
                 bool canPurchase = true;
 
@@ -63,19 +66,23 @@ namespace BLL.Services
             return (bestStore, minCost);
         }
 
-        public ProductDto FindCheapestStoreForProduct(string productName)
+        public async Task<ProductDto> FindCheapestStoreForProductAsync(string productName)
         {
-            var products = _productRepository.GetAllProducts()
+            var products = await _productRepository.GetAllProductsAsync();  // Await the async call
+
+            var cheapestProduct = products
                 .Where(p => p.Name == productName)
                 .OrderBy(p => p.Price)
                 .FirstOrDefault();
 
-            return _mapper.Map<ProductDto>(products);
+            return _mapper.Map<ProductDto>(cheapestProduct);  // Map the result to ProductDto
         }
 
-        public IEnumerable<ProductDto> FindPurchasableProducts(int storeCode, decimal budget)
+        public async Task<IEnumerable<ProductDto>> FindPurchasableProductsAsync(int storeCode, decimal budget)
         {
-            var products = _productRepository.GetProductsByStore(storeCode)
+            var products = await _productRepository.GetProductsByStoreAsync(storeCode);  // Make sure GetProductsByStoreAsync is async
+
+            var purchasableProducts = products
                 .Where(p => p.Price > 0 && budget >= p.Price)
                 .Select(p => new ProductDto
                 {
@@ -85,24 +92,24 @@ namespace BLL.Services
                     Price = p.Price
                 });
 
-            return products;
+            return purchasableProducts;
         }
 
-        public IEnumerable<ProductDto> GetAllProducts()
+        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
         {
-            var products = _productRepository.GetAllProducts();
+            var products = await _productRepository.GetAllProductsAsync();
             return _mapper.Map<IEnumerable<ProductDto>>(products);
         }
 
-        public IEnumerable<ProductDto> GetProductsByStore(int storeCode)
+        public async Task<IEnumerable<ProductDto>> GetProductsByStore(int storeCode)
         {
-            var products = _productRepository.GetProductsByStore(storeCode);
+            var products = await _productRepository.GetProductsByStoreAsync(storeCode);
             return _mapper.Map<IEnumerable<ProductDto>>(products);
         }
 
-        public decimal PurchaseProducts(int storeCode, Dictionary<string, int> products)
+        public async Task<decimal> PurchaseProductsAsync(int storeCode, Dictionary<string, int> products)
         {
-            var storeProducts = _productRepository.GetProductsByStore(storeCode).ToList();
+            var storeProducts = await _productRepository.GetProductsByStoreAsync(storeCode);  // Await the async repository call
             decimal totalCost = 0;
 
             foreach (var (productName, quantity) in products)
@@ -114,21 +121,29 @@ namespace BLL.Services
 
                 totalCost += product.Price * quantity;
                 product.Quantity -= quantity;
+
+                // Optionally update the product in the repository after purchase
+                await _productRepository.UpdateProductAsync(product);  // Ensure this is also async
             }
 
             return totalCost;
         }
 
-        public void RestockProducts(int storeCode, Dictionary<string, (int quantity, decimal price)> productUpdates)
+        public async Task RestockProductsAsync(int storeCode, Dictionary<string, (int quantity, decimal price)> productUpdates)
         {
             foreach (var (productName, (quantity, price)) in productUpdates)
             {
-                var product = _productRepository.GetProductsByStore(storeCode).FirstOrDefault(p => p.Name == productName);
+                // First, await the async call to get the products by store
+                var storeProducts = await _productRepository.GetProductsByStoreAsync(storeCode);
+
+                var product = storeProducts.FirstOrDefault(p => p.Name == productName);
 
                 if (product == null)
                 {
                     Console.WriteLine($"Product not found. Adding new product: {productName}");
-                    _productRepository.AddProduct(new Product
+
+                    // If the product is not found, add it asynchronously
+                    await _productRepository.AddProductAsync(new Product
                     {
                         Name = productName,
                         StoreCode = storeCode,
@@ -138,11 +153,15 @@ namespace BLL.Services
                 }
                 else
                 {
+                    // If the product is found, update its quantity and price
                     product.Quantity += quantity;
                     product.Price = price;
-                    _productRepository.UpdateProduct(product); // save  to the CSV
+
+                    // Ensure the update is performed asynchronously
+                    await _productRepository.UpdateProductAsync(product); // await the async update
                 }
             }
         }
+
     }
 }

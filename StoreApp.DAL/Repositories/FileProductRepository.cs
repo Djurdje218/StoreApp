@@ -11,23 +11,23 @@ namespace DAL.Repositories
 {
     public class FileProductRepository : IProductRepository
     {
-        string _filePath;
+        private string _filePath;
 
         public FileProductRepository(string filePath)
         {
             _filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", filePath);
         }
-        public void AddProduct(Product product)
+        public async Task AddProductAsync(Product product)
         {
-            var allProducts = GetAllProducts().ToList();
+            var allProducts = await GetAllProductsAsync();
 
             using (var sw = new StreamWriter(_filePath, true))
             {
-                sw.WriteLine($"{product.Name},{product.StoreCode},{product.Quantity},{product.Price}");
+              await  sw.WriteLineAsync($"{product.id},{product.Name},{product.StoreCode},{product.Quantity},{product.Price}");
             }
         }
 
-        public IEnumerable<Product> GetAllProducts()
+        public async Task<IEnumerable<Product>> GetAllProductsAsync()
         {
             if (!File.Exists(_filePath))
             {
@@ -39,21 +39,22 @@ namespace DAL.Repositories
             using (var sr = new StreamReader(_filePath))
             {
                 string line;
-                while ((line = sr.ReadLine()) != null)
+                while ((line = await sr.ReadLineAsync()) != null)
                 {
                     var data = line.Split(',');
-                    if (data.Length != 4)
+                    if (data.Length != 5)
                     {
                         Console.WriteLine($"Skipping invalid line: {line}");
                         continue;
                     }
 
-                    products.Add(new Product
+                     products.Add(new Product
                     {
-                        Name = data[0],
-                        StoreCode = int.Parse(data[1]),
-                        Quantity = int.Parse(data[2]),
-                        Price = decimal.Parse(data[3])
+                        id = int.Parse(data[0]),
+                        Name = data[1],
+                        StoreCode = int.Parse(data[2]),
+                        Quantity = int.Parse(data[3]),
+                        Price = decimal.Parse(data[4])
                     });
                 }
             }
@@ -61,7 +62,7 @@ namespace DAL.Repositories
             return products;
         }
 
-        public IEnumerable<Product> GetProductsByStore(int storeCode)
+        public async  Task<IEnumerable<Product>> GetProductsByStoreAsync(int storeCode)
         {
             if (!File.Exists(_filePath))
             {
@@ -73,7 +74,7 @@ namespace DAL.Repositories
             using (var sr = new StreamReader(_filePath))
             {
                 string line;
-                while ((line = sr.ReadLine()) != null)
+                while ((line = await sr.ReadLineAsync()) != null)
                 {
                     var data = line.Split(",");
                     if (data.Length != 4)
@@ -100,22 +101,23 @@ namespace DAL.Repositories
             return products;
         }
 
-        public void UpdateProduct(Product product)
+        public async Task UpdateProductAsync(Product product)
         {
-            var lines = File.ReadAllLines(_filePath).ToList();
+            var lines = (await File.ReadAllLinesAsync(_filePath)).ToList();
             var updated = false;
 
             for (int i = 0; i < lines.Count; i++)
             {
                 var fields = lines[i].Split(',');
-                if (fields[0] == product.Name) // Assuming `Id` is the first column
+                if (fields[0] == product.Name) 
                 {
                     // Update the product details in the CSV row
-                    fields[0] = product.Name;          // Name
-                    fields[1] = product.StoreCode.ToString(); // StoreCode
-                    fields[2] = product.Quantity.ToString();  // Quantity
-                    fields[3] = product.Price.ToString("F2"); // Price
-                    lines[i] = string.Join(",", fields); // Rebuild the CSV row
+                    fields[0] = product.id.ToString();          
+                    fields[1] = product.Name;         
+                    fields[2] = product.StoreCode.ToString(); 
+                    fields[3] = product.Quantity.ToString(); 
+                    fields[4] = product.Price.ToString("F2"); 
+                    lines[i] = string.Join(",", fields); 
                     updated = true;
                     break;
                 }
@@ -123,7 +125,7 @@ namespace DAL.Repositories
 
             if (updated)
             {
-                File.WriteAllLines(_filePath, lines); // Overwrite the file with updated data
+                await File.WriteAllLinesAsync(_filePath, lines); // Overwrite  file
             }
             else
             {

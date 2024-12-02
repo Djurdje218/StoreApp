@@ -1,8 +1,7 @@
-Laptop,1,60,999.00
-Smartphone,1,50,699
-Headphones,2,40,129
-Tablet,2,30,399
-Monitor,3,25,199
-Keyboard,3,60,49
-Mouse,3,80,29
-
+1,Laptop,1,60,999.00
+2,Smartphone,1,50,699
+3,Headphones,2,40,129
+4,Tablet,2,30,399
+5,Monitor,3,25,199
+6,Keyboard,3,60,49
+7,Mouse,3,80,29

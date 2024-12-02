@@ -9,10 +9,10 @@ namespace DAL.Infrastructure
 {
     public interface IProductRepository
     {
-        void AddProduct(Product product);
-        void UpdateProduct(Product product);
-        IEnumerable<Product> GetProductsByStore(int storeCode);
-        IEnumerable<Product> GetAllProducts();
+        Task AddProductAsync(Product product);
+        Task UpdateProductAsync(Product product);
+        Task<IEnumerable<Product>> GetProductsByStoreAsync(int storeCode);
+        Task<IEnumerable<Product>> GetAllProductsAsync();
 
 
     }

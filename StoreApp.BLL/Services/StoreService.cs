@@ -20,21 +20,21 @@ namespace BLL.Services
             _storeRepository = storeRepository;
             _mapper = mapper;
         }
-        public void AddStore(StoreDto storeDto)
+        public async Task AddStoreAsync(StoreDto storeDto)
         {
             var store = _mapper.Map<Store>(storeDto);
-            _storeRepository.AddStore(store);
+            await _storeRepository.AddStoreAsync(store);
         }
 
-        public IEnumerable<StoreDto> GetAllStores()
+        public async Task<IEnumerable<StoreDto>> GetAllStoresAsync()
         {
-            var stores = _storeRepository.GetAllStores();
+            var stores = await _storeRepository.GetAllStoresAsync();
             return _mapper.Map<IEnumerable<StoreDto>>(stores);
         }
 
-        public StoreDto GetStoreByCode(int storeCode)
+        public async Task<StoreDto> GetStoreByCodeAsync(int storeCode)
         {
-        var store = _storeRepository.GetStoreByCode(storeCode);
-        return _mapper.Map<StoreDto>(store);        }
-    }
+            var store = await _storeRepository.GetStoreByCodeAsync(storeCode);
+             return _mapper.Map<StoreDto>(store);        }
+        }
 }
